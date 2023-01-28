@@ -3,15 +3,26 @@
 #include <algorithm>
 #include <exception>
 #include <utility>
+#include <cstdlib>
+#include <ctime>
 
 using namespace Linear;
-Matrix::Matrix(int m_row, int m_col) : numOfRow(m_row), numOfColumn(m_col)
+Matrix::Matrix(int m_row, int m_col, double num) : numOfRow(m_row), numOfColumn(m_col)
 {
-	if (m_row <= 0 || m_col <= 0)
-		throw std::exception("row/col size <= 0");
-	size = numOfRow * numOfColumn;
-	data = new double[m_row * m_col];
-	memset(data, 0, sizeof(data));
+	if (m_row < 0 || m_col < 0)
+		throw std::exception("row/col size < 0");
+	if (m_row == 0 || m_col == 0)
+	{
+		size = 0;
+		m_row = m_col = 0;
+		data = nullptr;
+	}
+	else
+	{
+		size = numOfRow * numOfColumn;
+		data = new double[m_row * m_col];
+		std::fill(data, data + size, num);
+	}
 }
 
 Matrix::Matrix(const Matrix& m) : Matrix(m.numOfRow, m.numOfColumn)
@@ -33,6 +44,26 @@ Matrix::Matrix(double m, int n) : Matrix(n, n)
 	for (int i = 0; i < n; ++i)
 	{
 		*this[i][i] = m;
+	}
+}
+
+void Linear::Matrix::assign(int m_row, int m_col, double num)
+{
+	if (m_row < 0 || m_col < 0)
+		throw std::exception("row/col size < 0");
+	if (m_row == 0 || m_col == 0)
+	{
+		size = 0;
+		m_row = m_col = 0;
+		delete[] data;
+		data = nullptr;
+	}
+	else
+	{
+		size = numOfRow * numOfColumn;
+		delete[] data;
+		data = new double[m_row * m_col];
+		std::fill(data, data + size, num);
 	}
 }
 
@@ -66,7 +97,7 @@ Matrix& Matrix::operator=(Matrix&& m)
 	return *this;
 }
 
-Matrix Matrix::operator+(const Matrix& m) const&
+Matrix Matrix::operator+(const Matrix& m) const
 {
 	if (m.numOfRow != numOfRow || m.numOfColumn != numOfColumn)
 	{
@@ -80,21 +111,7 @@ Matrix Matrix::operator+(const Matrix& m) const&
 	return out;
 }
 
-Matrix Matrix::operator+(const Matrix m)&&
-{
-	if (m.numOfRow != numOfRow || m.numOfColumn != numOfColumn)
-	{
-		throw(std::exception("matrix addition of inconsistent specifications"));
-	}
-	Matrix out(std::move(*this));
-	for (int i = 0; i < size; ++i)
-	{
-		out.data[i] += m.data[i];
-	}
-	return out;
-}
-
-Matrix Matrix::operator-() const&
+Matrix Matrix::operator-() const
 {
 	Matrix out(*this);
 	for (int i = 0; i < size; ++i)
@@ -104,37 +121,13 @@ Matrix Matrix::operator-() const&
 	return out;
 }
 
-Matrix Matrix::operator-()&&
-{
-	Matrix out(std::move(*this));
-	for (int i = 0; i < size; ++i)
-	{
-		out.data[i] = -out.data[i];
-	}
-	return out;
-}
-
-Matrix Matrix::operator-(const Matrix& m) const&
+Matrix Matrix::operator-(const Matrix& m) const
 {
 	if (m.numOfRow != numOfRow || m.numOfColumn != numOfColumn)
 	{
 		throw(std::exception("matrix deduction of inconsistent specifications"));
 	}
 	Matrix out(*this);
-	for (int i = 0; i < size; ++i)
-	{
-		out.data[i] -= m.data[i];
-	}
-	return out;
-}
-
-Matrix Matrix::operator-(const Matrix& m)&&
-{
-	if (m.numOfRow != numOfRow || m.numOfColumn != numOfColumn)
-	{
-		throw(std::exception("matrix deduction of inconsistent specifications"));
-	}
-	Matrix out(std::move(*this));
 	for (int i = 0; i < size; ++i)
 	{
 		out.data[i] -= m.data[i];
@@ -194,6 +187,15 @@ Matrix& Matrix::operator*=(const Matrix& m)
 	return *this;
 }
 
+void Linear::Matrix::random(double min, double max)
+{
+	for (int i = 0; i < size; i++)
+	{
+		srand(clock());
+		data[i] = double(rand()) / RAND_MAX * (max - min) + min;
+	}
+}
+
 Matrix::~Matrix()
 {
 	delete[] data;
@@ -221,6 +223,11 @@ ColVector RowVector::transpose() const
 	return ColVector(data, numOfColumn);
 }
 
+void Linear::RowVector::assign(int n, double val)
+{
+	Matrix::assign(1, n, val);
+}
+
 ColVector::ColVector(const Matrix& m) : Matrix(m)
 {
 	if (numOfColumn != 1)
@@ -243,6 +250,11 @@ RowVector ColVector::transpose() const
 	return RowVector(data, numOfRow);
 }
 
+void Linear::ColVector::assign(int n, double val)
+{
+	Matrix::assign(n, 1, val);
+}
+
 Matrix Matrix::transpose() const
 {
 	if (numOfColumn == 1 || numOfRow == 1)
@@ -261,5 +273,4 @@ Matrix Matrix::transpose() const
 			}
 		return out;
 	}
-
 }

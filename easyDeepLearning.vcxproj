@@ -24,6 +24,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Matrix.cpp" />
+    <ClCompile Include="NeuralNetwork.cpp" />
+    <ClCompile Include="UnitTest.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
