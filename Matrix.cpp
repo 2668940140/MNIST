@@ -91,11 +91,8 @@ void Linear::Matrix::assign(int m_row, int m_col, double num)
 	else
 	{
 		delete[] data;
-<<<<<<< HEAD
 		numOfRow = m_row;
 		numOfColumn = m_col;
-=======
->>>>>>> c305fc995ca677e435cde7d565c241f85421e3fd
 		size = numOfRow * numOfColumn;
 		data = new double[size];
 		std::fill(data, data + size, num);
@@ -312,7 +309,6 @@ Matrix Matrix::transpose() const
 	}
 }
 
-<<<<<<< HEAD
 Matrix Linear::operator+(Matrix&& m1, const Matrix& m2)
 {
 	if (m1.numOfRow != m2.numOfRow || m1.numOfColumn != m2.numOfColumn)
@@ -327,8 +323,6 @@ Matrix Linear::operator+(Matrix&& m1, const Matrix& m2)
 	return out;
 }
 
-=======
->>>>>>> c305fc995ca677e435cde7d565c241f85421e3fd
 std::ostream& Linear::operator<<(std::ostream& os, const Matrix& m)
 {
 	for (int i = 0; i < m.numOfRow; ++i)
