@@ -26,6 +26,7 @@ public:
 
 	template<class Init, class Last>
 	NeuralNetwork(Init, Last); //all weights are set to 1 as default
+
 	NeuralNetwork(std::initializer_list<int>); //all weights are set to 1 as default, b equals to 0
 	NeuralNetwork(int inputLayerExtent, int hideLayerNum, int hideLayerExtent, int outPutLayerExtent); //all weights are set to 1 as default
 	NeuralNetwork(const char*);

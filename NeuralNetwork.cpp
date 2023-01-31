@@ -116,7 +116,7 @@ const Linear::RowVector& NeuralNetwork::judge(const Linear::RowVector& input)
 	layers[0] = input;
 	for (int i = 0; i < depth - 1; ++i)
 	{
-		layers[i + 1] = (layers[i] * connections[i]).transpose() + biases[i];
+		layers[i + 1] = (layers[i] * connections[i]) + biases[i];
 	}
 	return layers[depth - 1];
 }

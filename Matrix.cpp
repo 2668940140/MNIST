@@ -7,6 +7,8 @@
 #include <ctime>
 
 using namespace Linear;
+
+int Matrix::lastRand = 0;
 Matrix::Matrix(int m_row, int m_col, double num) : numOfRow(m_row), numOfColumn(m_col)
 {
 	if (m_row < 0 || m_col < 0)
@@ -26,7 +28,9 @@ Matrix::Matrix(int m_row, int m_col, double num) : numOfRow(m_row), numOfColumn(
 }
 
 Matrix::Matrix(const Matrix& m) : Matrix(m.numOfRow, m.numOfColumn)
-{}
+{
+	std::copy(m.data, m.data + size, data);
+}
 
 Matrix::Matrix(Matrix&& m) : numOfRow(m.numOfRow), numOfColumn(m.numOfColumn), size(m.size)
 {
@@ -37,6 +41,32 @@ Matrix::Matrix(Matrix&& m) : numOfRow(m.numOfRow), numOfColumn(m.numOfColumn), s
 Matrix::Matrix(double m) : Matrix(1, 1)
 {
 	data[0] = m;
+}
+
+Linear::Matrix::Matrix(std::initializer_list<std::initializer_list<double>> m)
+{
+	numOfRow = int(m.size());
+	numOfColumn = int(m.begin()->size());
+	if (numOfRow == 0 || numOfColumn == 0)
+	{
+		size = 0;
+		numOfRow = numOfColumn = 0;
+		data = nullptr;
+	}
+	else
+	{
+		size = numOfRow * numOfColumn;
+		data = new double[size];
+		int cnt = 0;
+		for (auto& p1 : m)
+			for (auto& p2 : p1)
+			{
+				if (p1.size() != numOfColumn)
+					throw std::exception("Column sizes are not the same.");
+				data[cnt++] = p2;
+			}
+	}
+	
 }
 
 Matrix::Matrix(double m, int n) : Matrix(n, n)
@@ -53,16 +83,18 @@ void Linear::Matrix::assign(int m_row, int m_col, double num)
 		throw std::exception("row/col size < 0");
 	if (m_row == 0 || m_col == 0)
 	{
-		size = 0;
-		m_row = m_col = 0;
 		delete[] data;
+		size = 0;
+		numOfColumn = numOfRow = 0;
 		data = nullptr;
 	}
 	else
 	{
-		size = numOfRow * numOfColumn;
 		delete[] data;
-		data = new double[m_row * m_col];
+		numOfRow = m_row;
+		numOfColumn = m_col;
+		size = numOfRow * numOfColumn;
+		data = new double[size];
 		std::fill(data, data + size, num);
 	}
 }
@@ -108,6 +140,7 @@ Matrix Matrix::operator+(const Matrix& m) const
 	{
 		out.data[i] += m.data[i];
 	}
+
 	return out;
 }
 
@@ -191,8 +224,9 @@ void Linear::Matrix::random(double min, double max)
 {
 	for (int i = 0; i < size; i++)
 	{
-		srand(clock());
-		data[i] = double(rand()) / RAND_MAX * (max - min) + min;
+		srand(int(time(0))+lastRand);
+		lastRand = rand();
+		data[i] = double(lastRand) / (double(RAND_MAX) / double(max - min)) + min;
 	}
 }
 
@@ -273,4 +307,35 @@ Matrix Matrix::transpose() const
 			}
 		return out;
 	}
+}
+
+Matrix Linear::operator+(Matrix&& m1, const Matrix& m2)
+{
+	if (m1.numOfRow != m2.numOfRow || m1.numOfColumn != m2.numOfColumn)
+	{
+		throw(std::exception("matrix addition of inconsistent specifications"));
+	}
+	Matrix out(std::move(m1));
+	for (int i = 0; i < out.size; ++i)
+	{
+		out.data[i] += m2.data[i];
+	}
+	return out;
+}
+
+std::ostream& Linear::operator<<(std::ostream& os, const Matrix& m)
+{
+	for (int i = 0; i < m.numOfRow; ++i)
+		for (int j = 0; j < m.numOfColumn; ++j)
+		{
+			if (j == 0)
+				os << '(';
+			os << m[i][j];
+			if (j == m.numOfColumn - 1)
+				os << ')' << std::endl;
+			else
+				os << '\t';
+		
+		}
+	return os;
 }
