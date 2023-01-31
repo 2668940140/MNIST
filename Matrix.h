@@ -1,10 +1,12 @@
 #pragma once
 #include <utility>
 #include <algorithm>
+#include <iostream>
 namespace Linear {
 	class Matrix
 	{
 	protected:
+		static int lastRand;
 		int numOfRow = 0;
 		int numOfColumn = 0;
 		int size = 0;
@@ -16,6 +18,7 @@ namespace Linear {
 
 		Matrix(const Matrix&);
 		Matrix(Matrix&&);
+		Matrix(std::initializer_list<std::initializer_list<double>>);
 		explicit Matrix(double);
 		Matrix(double, int);
 
@@ -41,6 +44,8 @@ namespace Linear {
 
 		void random(double min=0.0, double max=1.0);
 		~Matrix();
+
+		friend std::ostream& operator<<(std::ostream&, const Matrix&);
 	};
 
 	class ColVector;
@@ -53,8 +58,11 @@ namespace Linear {
 		RowVector(Matrix&&);
 		explicit RowVector(double m) : Matrix(m) {}
 		RowVector(double*, int);
+
 		template<class Init, class Last>
 		RowVector(Init, Last);
+
+		RowVector(std::initializer_list<double> l) : RowVector(l.begin(), l.end()) {}
 		double& operator[](int index) { return data[index]; }
 		const double& operator[](int index) const { return data[index]; }
 		ColVector transpose() const; //O(n)
@@ -72,8 +80,11 @@ namespace Linear {
 		ColVector(Matrix&&);
 		explicit ColVector(double m) : Matrix(m) {}
 		ColVector(double*, int);
+
 		template<class Init, class Last>
 		ColVector(Init, Last);
+
+		ColVector(std::initializer_list<double> l) : ColVector(l.begin(), l.end()) {}
 		double& operator[](int index) { return data[index]; }
 		const double& operator[](int index) const { return data[index]; }
 		RowVector transpose() const; //O(n)
@@ -84,15 +95,15 @@ namespace Linear {
 	};
 
 	template<class Init, class Last>
-	inline RowVector::RowVector(Init m_1, Last m_2)
+	inline RowVector::RowVector(Init m_1, Last m_2) : Matrix(1, int(std::distance(m_1, m_2)))
 	{
 		std::copy(m_1, m_2, data);
 	}
 
 	template<class Init, class Last>
-	inline ColVector::ColVector(Init m_1, Last m_2)
+	inline ColVector::ColVector(Init m_1, Last m_2) : Matrix(int(std::distance(m_1, m_2)), 1)
 	{
 		std::copy(m_1, m_2, data);
 	}
-
 }
+
