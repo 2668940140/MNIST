@@ -1,10 +1,17 @@
 #pragma once
 #include "Matrix.h"
 #include <initializer_list>
+
+namespace AuxFuncs
+{
+	inline Linear::Matrix sigmoid(Linear::Matrix&& m);
+	inline double mse(const Linear::RowVector&, const Linear::RowVector&);
+}
+
 class NeuralNetwork
 {
 public:
-	enum ActFunc { Sigmoid };
+	enum ActFunc { Sigmoid};
 	enum LossFunc { MSE };
 
 private:
@@ -13,11 +20,12 @@ private:
 	Linear::Matrix* connections = nullptr; //lenth equals to depth-1,specifications accord with extents
 	Linear::RowVector* biases = nullptr; //lenth equals to depth, specifications accord with extents
 	Linear::RowVector* layers = nullptr; //lenth equals to depth,specifications accord with extents
+	Linear::RowVector* errDeviation = nullptr; //lenth equals to depth, specifications accord with extents
 
+public:
 	ActFunc actFunc = Sigmoid;
 	LossFunc lossFunc = MSE;
 	double optAlpha = 0.01;
-
 private: //deleted
 	NeuralNetwork(const NeuralNetwork&) = delete;
 	NeuralNetwork& operator=(const NeuralNetwork&) = delete;
@@ -43,5 +51,5 @@ public:
 
 	const Linear::RowVector& judge(const Linear::RowVector& input);
 	double judge(const Linear::RowVector& input, const Linear::RowVector& expectedOutput);
-	double train(const Linear::RowVector& input, const Linear::RowVector& expectedOutput); //return the cost
+	double train(const Linear::RowVector& input, const Linear::RowVector& expectedOutput); //return the cost, use back-propagation
 };

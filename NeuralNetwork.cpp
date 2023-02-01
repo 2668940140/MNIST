@@ -34,13 +34,16 @@ NeuralNetwork::NeuralNetwork(const Init begin, const Last end) : depth(int(std::
 	
 	layers = new Linear::RowVector[depth];
 	biases = new Linear::RowVector[depth-1];
+	errDeviation = new Linear::RowVector[depth];
 	for (int i = 0; i < depth - 1; ++i)
 	{
 		layers[i].assign(extents[i], 0.0);
 		biases[i].assign(extents[i+1], 0.0);
+		errDeviation[i].assign(extents[i + 1], 0.0);
 	}
 	layers[depth-1].assign(extents[depth-1], 0.0);
-	
+	errDeviation[depth - 1].assign(extents[depth - 1], 0.0);
+
 	connections = new Linear::Matrix[depth - 1];
 	for (int i = 0; i < depth-1; ++i)
 	{
@@ -66,12 +69,15 @@ NeuralNetwork::NeuralNetwork(int inputLayerExtent, int hideLayerNum, int hideLay
 
 	layers = new Linear::RowVector[depth];
 	biases = new Linear::RowVector[depth - 1];
+	errDeviation = new Linear::RowVector[depth];
 	for (int i = 0; i < depth - 1; ++i)
 	{
 		layers[i].assign(extents[i], 0.0);
 		biases[i].assign(extents[i + 1], 0.0);
+		errDeviation[i].assign(extents[i + 1], 0.0);
 	}
 	layers[depth - 1].assign(extents[depth - 1], 0.0);
+	errDeviation[depth - 1].assign(extents[depth - 1], 0.0);
 
 	connections = new Linear::Matrix[depth - 1];
 	for (int i = 0; i < depth - 1; ++i)
@@ -104,7 +110,7 @@ void NeuralNetwork::save(const char*) const
 
 NeuralNetwork::~NeuralNetwork()
 {
-	delete[] extents, connections, biases, layers;
+	delete[] extents, connections, biases, layers, errDeviation;
 }
 
 inline void NeuralNetwork::setOptAlpha(double)
@@ -113,20 +119,98 @@ inline void NeuralNetwork::setOptAlpha(double)
 
 const Linear::RowVector& NeuralNetwork::judge(const Linear::RowVector& input)
 {
-	layers[0] = input;
-	for (int i = 0; i < depth - 1; ++i)
+	switch (actFunc)
 	{
-		layers[i + 1] = (layers[i] * connections[i]) + biases[i];
+	case NeuralNetwork::Sigmoid:
+		layers[0] = input;
+		for (int i = 0; i < depth - 1; ++i)
+		{
+			layers[i + 1] = AuxFuncs::sigmoid(layers[i] * connections[i] + biases[i]);
+		}
+		return layers[depth - 1];
+		break;
+	default:
+		throw std::exception("Unexcepted actFunc");
+		break;
 	}
-	return layers[depth - 1];
+
 }
 
 double NeuralNetwork::judge(const Linear::RowVector& input, const Linear::RowVector& expectedOutput)
 {
-	return 0.0;
+	judge(input);
+	switch (lossFunc)
+	{
+	case NeuralNetwork::MSE:
+		return AuxFuncs::mse(layers[depth - 1], expectedOutput);
+		break;
+	default:
+		throw std::exception("Unexcepted lossFunc");
+		break;
+	}
 }
 
 double NeuralNetwork::train(const Linear::RowVector& input, const Linear::RowVector& expectedOutput)
 {
-	return 0.0;
+	judge(input);
+	
+	switch (actFunc)
+	{
+	case NeuralNetwork::Sigmoid:
+		switch (lossFunc)
+		{
+		case NeuralNetwork::MSE:
+			errDeviation[depth - 1] = dot(layers[depth - 1] - expectedOutput , layers[depth - 1] , 
+			Linear::RowVector(extents[depth-1],1.0) - layers[depth - 1]);
+			for (int i = depth - 2; i >= 0; --i)
+			{
+				errDeviation[i] = dot(errDeviation[i + 1] * connections[i] , layers[i] , 
+					Linear::RowVector(extents[i], 1.0) - layers[i]);
+			}
+			for (int i = 0; i < depth - 1; ++i)
+			{
+				biases[i] -= optAlpha * errDeviation[i];
+				connections[i] -= optAlpha * layers[i].transpose() * errDeviation[i];
+			}
+			break;
+		default:
+			throw std::exception("Unexcepted lossFunc");
+			break;
+		}
+		break;
+	default:
+		throw std::exception("Unexcepted actFunc");
+		break;
+	}
+	
+	switch (lossFunc)
+	{
+	case NeuralNetwork::MSE:
+		return AuxFuncs::mse(layers[depth - 1], expectedOutput);
+		break;
+	default:
+		throw std::exception("Unexcepted lossFunc");
+		break;
+	}
+}
+
+Linear::Matrix AuxFuncs::sigmoid(Linear::Matrix&& m)
+{
+	for (int i = 0; i < m.row_n(); ++i)
+		for (int j = 0; j < m.column_n(); ++j)
+			m[i][j] = 1 / (1 + exp(-m[i][j]));
+	return m;
+}
+
+double AuxFuncs::mse(const Linear::RowVector& m1, const Linear::RowVector& m2)
+{
+	double out = 0.0;
+	if (m1.column_n() != m2.column_n())
+		throw std::exception("Vector of invalid sizes called mse");
+	for (int i = 0; i < m1.column_n(); ++i)
+	{
+		out += pow(m1[i] - m2[i], 2);
+	}
+	out /= m1.column_n() * 2; //for a better-looking derivative
+	return out;
 }

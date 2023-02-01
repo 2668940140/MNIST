@@ -15,6 +15,7 @@ namespace Linear {
 		Matrix(int m_row = 0, int m_col = 0, double num = 0.0); //给出行数和列数创建
 		int row_n() const { return numOfRow; }
 		int column_n() const { return numOfColumn; }
+		int capacity() const { return size; }
 
 		Matrix(const Matrix&);
 		Matrix(Matrix&&);
@@ -37,11 +38,33 @@ namespace Linear {
 		Matrix operator-()const;
 		Matrix operator-(const Matrix&)const;
 		Matrix& operator-=(const Matrix&);
+		friend Matrix operator-(Matrix&&, const Matrix&);
 
 		Matrix operator*(const Matrix&)const;
 		Matrix& operator*=(const Matrix&);
+		
+		friend Matrix operator*(double, const Matrix& m);
+		friend Matrix operator*(double, Matrix&&);
 
 		Matrix transpose() const;
+
+		friend Matrix dot2(const Matrix& m1, const Matrix& m2);
+		friend Matrix dot2(Matrix&& m1, const Matrix& m2);
+
+		template<class... Args>
+		friend Matrix dot(const Matrix& m, Args... args)
+		{
+			return dot2(m, dot(args...));
+		}
+		template<class... Args>
+		friend Matrix dot(const Matrix&& m, Args... args)
+		{
+			return dot2(std::move(m), dot(args...));
+		}
+		friend Matrix dot(const Matrix& m)
+		{
+			return m;
+		}
 
 		void random(double min=0.0, double max=1.0);
 		~Matrix();
@@ -59,6 +82,7 @@ namespace Linear {
 		RowVector(Matrix&&);
 		explicit RowVector(double m) : Matrix(m) {}
 		RowVector(double*, int);
+		int row_n() const = delete;
 
 		template<class Init, class Last>
 		RowVector(Init, Last);
@@ -71,6 +95,7 @@ namespace Linear {
 		double* begin() const { return data; }
 		double* end() const { return data + size; }
 		using Matrix::operator=;
+
 	};
 
 	class ColVector : public Matrix
@@ -81,6 +106,7 @@ namespace Linear {
 		ColVector(Matrix&&);
 		explicit ColVector(double m) : Matrix(m) {}
 		ColVector(double*, int);
+		int column_n() const = delete;
 
 		template<class Init, class Last>
 		ColVector(Init, Last);
@@ -106,5 +132,7 @@ namespace Linear {
 	{
 		std::copy(m_1, m_2, data);
 	}
+
+	
 }
 

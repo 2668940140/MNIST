@@ -66,7 +66,7 @@ Linear::Matrix::Matrix(std::initializer_list<std::initializer_list<double>> m)
 				data[cnt++] = p2;
 			}
 	}
-	
+
 }
 
 Matrix::Matrix(double m, int n) : Matrix(n, n)
@@ -214,6 +214,19 @@ Matrix& Matrix::operator-=(const Matrix& m)
 	return *this;
 }
 
+Matrix Linear::operator-(Matrix&& m1, const Matrix& m2)
+{
+	if (m1.numOfRow != m2.numOfRow || m1.numOfColumn != m2.numOfColumn)
+	{
+		throw(std::exception("matrix deduction of inconsistent specifications"));
+	}
+	for (int i = 0; i < m1.size; ++i)
+	{
+		m1.data[i] -= m2.data[i];
+	}
+	return m1;
+}
+
 Matrix& Matrix::operator*=(const Matrix& m)
 {
 	*this = *this * m;
@@ -224,7 +237,7 @@ void Linear::Matrix::random(double min, double max)
 {
 	for (int i = 0; i < size; i++)
 	{
-		srand(int(time(0))+lastRand);
+		srand(int(time(0)) + lastRand);
 		lastRand = rand();
 		data[i] = double(lastRand) / (double(RAND_MAX) / double(max - min)) + min;
 	}
@@ -335,7 +348,49 @@ std::ostream& Linear::operator<<(std::ostream& os, const Matrix& m)
 				os << ')' << std::endl;
 			else
 				os << '\t';
-		
+
 		}
 	return os;
+}
+
+Matrix Linear::operator*(double val, const Matrix& m)
+{
+	Matrix out(m);
+	for (int i = 0; i < m.size; ++i)
+	{
+		out.data[i] *= val;
+	}
+	return out;
+}
+
+Matrix Linear::operator*(double val, Matrix&& m)
+{
+	for (int i = 0; i < m.size; ++i)
+	{
+		m.data[i] *= val;
+	}
+	return m;
+}
+
+Matrix Linear::dot2(const Matrix& m1, const Matrix& m2)
+{
+	if (m1.numOfColumn != m2.numOfColumn || m1.numOfRow != m2.numOfRow || (m1.numOfRow!=1&&m1.numOfColumn!=1))
+		throw std::exception("Not proper dot product");
+	Matrix out(m1);
+	for (int i = 0; i < m1.size; i++)
+	{
+		out.data[i] *= m2.data[i];
+	}
+	return out;
+}
+
+Matrix Linear::dot2(Matrix&& m1, const Matrix& m2)
+{
+	if (m1.numOfColumn != m2.numOfColumn || m1.numOfRow != m2.numOfRow || (m1.numOfRow != 1 && m1.numOfColumn != 1))
+		throw std::exception("Not proper dot product");
+	for (int i = 0; i < m1.size; i++)
+	{
+		m1.data[i] *= m2.data[i];
+	}
+	return m1;
 }

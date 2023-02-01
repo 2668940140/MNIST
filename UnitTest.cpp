@@ -9,7 +9,15 @@ int main()
 		NeuralNetwork nt = { 2,2,2};
 		//nt.randomInitialize();
 		RowVector input = { 1,1 };
-		cout << nt.judge(input);
+		double inputA;
+		cin >> inputA;
+		nt.optAlpha = inputA;
+		int limit = 0;
+		cin >> limit;
+		for (int i = 0; i < limit; ++i)
+		{
+			cout << nt.train(input, input) << endl;
+		}
 	}
 	catch (const std::exception& e)
 	{
