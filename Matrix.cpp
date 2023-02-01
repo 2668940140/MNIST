@@ -316,7 +316,7 @@ Matrix Matrix::transpose() const
 		for (int i = 0; i < numOfRow; ++i)
 			for (int j = 0; j < numOfColumn; ++j)
 			{
-				out[j][i] = *this[i][j];
+				out[j][i] = this->operator[](i)[j];
 			}
 		return out;
 	}

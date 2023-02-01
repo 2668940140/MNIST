@@ -47,7 +47,7 @@ NeuralNetwork::NeuralNetwork(const Init begin, const Last end) : depth(int(std::
 	connections = new Linear::Matrix[depth - 1];
 	for (int i = 0; i < depth-1; ++i)
 	{
-		connections[i].assign(extents[i + 1], extents[i], 1.0);
+		connections[i].assign(extents[i], extents[i + 1], 1.0);
 	}
 }
 
@@ -98,10 +98,6 @@ void NeuralNetwork::randomInitialize()
 		biases[i].random();
 	}
 	return;
-}
-
-void NeuralNetwork::readSave(const char*)
-{
 }
 
 void NeuralNetwork::save(const char*) const
@@ -164,13 +160,13 @@ double NeuralNetwork::train(const Linear::RowVector& input, const Linear::RowVec
 			Linear::RowVector(extents[depth-1],1.0) - layers[depth - 1]);
 			for (int i = depth - 2; i >= 0; --i)
 			{
-				errDeviation[i] = dot(errDeviation[i + 1] * connections[i] , layers[i] , 
+				errDeviation[i] = dot(errDeviation[i + 1] * connections[i].transpose(), layers[i],
 					Linear::RowVector(extents[i], 1.0) - layers[i]);
 			}
 			for (int i = 0; i < depth - 1; ++i)
 			{
-				biases[i] -= optAlpha * errDeviation[i];
-				connections[i] -= optAlpha * layers[i].transpose() * errDeviation[i];
+				biases[i] -= optAlpha * errDeviation[i + 1];
+				connections[i] -= optAlpha * layers[i].transpose() * errDeviation[i + 1];
 			}
 			break;
 		default:

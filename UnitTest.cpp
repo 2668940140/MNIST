@@ -6,18 +6,16 @@ using namespace Linear;
 int main()
 {
 	try {
-		NeuralNetwork nt = { 2,2,2};
+		NeuralNetwork nt = { 2,3,4,5,4};
 		//nt.randomInitialize();
 		RowVector input = { 1,1 };
-		double inputA;
-		cin >> inputA;
-		nt.optAlpha = inputA;
-		int limit = 0;
-		cin >> limit;
-		for (int i = 0; i < limit; ++i)
+		RowVector output = { 0.2,0.4,0.6,0.0};
+		nt.optAlpha = 0.01;
+		for (int i = 0; i < 100000; ++i)
 		{
-			cout << nt.train(input, input) << endl;
+			cout << nt.train(input, output) << endl;
 		}
+		cout << nt.judge(input);
 	}
 	catch (const std::exception& e)
 	{

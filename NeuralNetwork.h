@@ -26,6 +26,7 @@ public:
 	ActFunc actFunc = Sigmoid;
 	LossFunc lossFunc = MSE;
 	double optAlpha = 0.01;
+
 private: //deleted
 	NeuralNetwork(const NeuralNetwork&) = delete;
 	NeuralNetwork& operator=(const NeuralNetwork&) = delete;
@@ -37,9 +38,9 @@ public:
 
 	NeuralNetwork(std::initializer_list<int>); //all weights are set to 1 as default, b equals to 0
 	NeuralNetwork(int inputLayerExtent, int hideLayerNum, int hideLayerExtent, int outPutLayerExtent); //all weights are set to 1 as default
-	NeuralNetwork(const char*);
+	NeuralNetwork(const char*); //read from file
 	void randomInitialize(); //set all weights and b to a random value
-	void readSave(const char*);
+
 	void save(const char*) const;
 	~NeuralNetwork();
 
