@@ -1,10 +1,12 @@
 #include "NeuralNetwork.h"
+#include "Data.h"
 #include <iostream>
 using namespace std;
 using namespace Linear;
 
 int main()
 {
+	/*
 	try {
 		NeuralNetwork nt = { 2,3,4,5,4};
 		//nt.randomInitialize();
@@ -17,6 +19,21 @@ int main()
 		}
 		cout << nt.judge(input);
 	}
+	*/
+
+	try
+	{
+		Data test(R"(D:\doucument\Code\projects\easyDeepLearning\Resources\train-images.idx3-ubyte)",
+			R"(D:\doucument\Code\projects\easyDeepLearning\Resources\train-labels.idx1-ubyte)");
+		cout << test.good() << endl;
+		int index;
+		while (cin >> index) 
+		{
+			cout << test[index].second << endl;
+			Visualize::show(test[index].first, 28, 28);
+		}
+	}
+
 	catch (const std::exception& e)
 	{
 		cout << e.what();

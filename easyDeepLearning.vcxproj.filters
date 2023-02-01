@@ -21,6 +21,9 @@
     <ClInclude Include="NeuralNetwork.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Matrix.cpp">
@@ -30,6 +33,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="UnitTest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Data.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
