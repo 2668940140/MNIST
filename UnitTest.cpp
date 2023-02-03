@@ -13,14 +13,27 @@ int main()
 		RowVector input = { 1,1 };
 		RowVector output = { 0.2,0.4,0.6,0.0};
 		nt.optAlpha = 0.01;
-		for (int i = 0; i < 100000; ++i)
+		for (int i = 0; i < 10000; ++i)
 		{
 			cout << nt.train(input, output) << endl;
 		}
 		cout << nt.judge(input);
+		//wstring path(LR"(D:\doucument\快速访问\桌面\save)");
+		//cout << nt.save(path.c_str());
 	}
 	*/
 
+	try {
+
+		//nt.randomInitialize();
+		RowVector input = { 1,1 };
+		wstring path(LR"(D:\doucument\快速访问\桌面\save)");
+		NeuralNetwork nt(path.c_str());
+		cout << nt.judge(input);
+	}
+
+
+	/*
 	try
 	{
 		Data test(R"(D:\doucument\Code\projects\easyDeepLearning\Resources\train-images.idx3-ubyte)",
@@ -33,6 +46,7 @@ int main()
 			Visualize::show(test[index].first, 28, 28);
 		}
 	}
+	*/
 
 	catch (const std::exception& e)
 	{

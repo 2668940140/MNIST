@@ -15,10 +15,10 @@ public:
 	enum LossFunc { MSE };
 
 private:
-	const int depth = 0;
+	int depth = 0;
 	int* extents = nullptr; //lenth equals to depth
 	Linear::Matrix* connections = nullptr; //lenth equals to depth-1,specifications accord with extents
-	Linear::RowVector* biases = nullptr; //lenth equals to depth, specifications accord with extents
+	Linear::RowVector* biases = nullptr; //lenth equals to depth - 1, specifications accord with extents
 	Linear::RowVector* layers = nullptr; //lenth equals to depth,specifications accord with extents
 	Linear::RowVector* errDeviation = nullptr; //lenth equals to depth, specifications accord with extents
 
@@ -38,10 +38,10 @@ public:
 
 	NeuralNetwork(std::initializer_list<int>); //all weights are set to 1 as default, b equals to 0
 	NeuralNetwork(int inputLayerExtent, int hideLayerNum, int hideLayerExtent, int outPutLayerExtent); //all weights are set to 1 as default
-	NeuralNetwork(const char*); //read from file
+	NeuralNetwork(const wchar_t*); //read from file
 	void randomInitialize(); //set all weights and b to a random value
 
-	void save(const char*) const;
+	bool save(const wchar_t*) const;
 	~NeuralNetwork();
 
 	ActFunc showActFunc() const { return actFunc; }

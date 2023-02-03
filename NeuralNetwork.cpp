@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <exception>
 #include <cstdlib>
+#include <fstream>
 
 /*
 const int depth;
@@ -82,12 +83,46 @@ NeuralNetwork::NeuralNetwork(int inputLayerExtent, int hideLayerNum, int hideLay
 	connections = new Linear::Matrix[depth - 1];
 	for (int i = 0; i < depth - 1; ++i)
 	{
-		connections[i].assign(extents[i + 1], extents[i], 1.0);
+		connections[i].assign(extents[i], extents[i + 1], 1.0);
 	}
 }
 
-NeuralNetwork::NeuralNetwork(const char*)
+NeuralNetwork::NeuralNetwork(const wchar_t* m_name)
 {
+	std::ifstream is(m_name);
+	is.read((char*)&depth, 4);
+	is.read((char*)&actFunc, 4);
+	is.read((char*)&lossFunc, 4);
+	is.read((char*)&optAlpha, 8);
+	extents = new int[depth];
+	for (int i = 0; i < depth; ++i)
+	{
+		is.read((char*)&extents[i], 4);
+	}
+	connections = new Linear::Matrix[depth - 1];
+	biases = new Linear::RowVector[depth - 1];
+	for (int i = 0; i < depth - 1; ++i)
+	{
+		biases[i].assign(extents[i+1]);
+		connections[i].assign(extents[i], extents[i + 1]);
+		for (int j = 0; j < extents[i]; ++j)
+			for (int k = 0; k < extents[i + 1]; ++k)
+			{
+				is.read((char*)&connections[i][j][k], 8);
+			}
+	}
+
+	layers = new Linear::RowVector[depth];
+	errDeviation = new Linear::RowVector[depth];
+	for (int i = 0; i < depth; ++i)
+	{
+		layers[i].assign(extents[i]);
+		errDeviation[i].assign(extents[i]);
+		for (int j = 0; j < extents[i]; ++j)
+		{
+			is.read((char*)&biases[i][j], 8);
+		}
+	}
 }
 
 void NeuralNetwork::randomInitialize()
@@ -100,9 +135,32 @@ void NeuralNetwork::randomInitialize()
 	return;
 }
 
-void NeuralNetwork::save(const char*) const
+bool NeuralNetwork::save(const wchar_t* m_path) const
 {
+	std::ofstream os(m_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+	os.write((char*)&depth, 4);
+	os.write((char*)&actFunc, 4);
+	os.write((char*)&lossFunc, 4);
+	os.write((char*)&optAlpha, 8);
+	for (int i = 0; i < depth; ++i)
+	{
+		os.write((char*)&extents[i], 4);
+	}
+	for (int i = 0; i < depth - 1; ++i)
+		for (int j = 0; j < extents[i]; ++j)
+			for (int k = 0; k < extents[i+1]; ++k)
+			{
+				os.write((char*)&connections[i][j][k], 8);
+			}
+	for (int i = 0; i < depth; ++i)
+		for (int j = 0; j < extents[i]; ++j)
+		{
+			os.write((char*)&biases[i][j], 8);
+		}
+	os.flush();
+	return os.good();
 }
+
 
 NeuralNetwork::~NeuralNetwork()
 {
