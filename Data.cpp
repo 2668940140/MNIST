@@ -60,13 +60,10 @@ Data::Data(const string& imf, const string& lbf) : imageFileName(imf), labelFile
     }
 }
 
-int Data::size() const
-{
-    return m_size;
-}
-
 std::pair<Linear::RowVector, Linear::RowVector> Data::operator[](int index)
 {
+    if (index >= m_size)
+        throw std::exception("Index out of limit");
     std::pair<Linear::RowVector, Linear::RowVector> out;
     out.first.assign(numOfColumn * numOfRow, 0.0);
     out.second.assign(10, 0.0);

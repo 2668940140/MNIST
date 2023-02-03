@@ -1,11 +1,21 @@
+/*
 #include "NeuralNetwork.h"
 #include "Data.h"
 #include <iostream>
+#include <vector>
+#include <initializer_list>
 using namespace std;
 using namespace Linear;
 
 int main()
 {
+	try
+	{
+		vector<int> test{ 2,3,4,3,2 };
+		NeuralNetwork nt(test.begin(), test.end());
+		cout << nt.judge({ 1,2 });
+	}
+
 	/*
 	try {
 		NeuralNetwork nt = { 2,3,4,5,4};
@@ -23,6 +33,7 @@ int main()
 	}
 	*/
 
+	/*
 	try {
 
 		//nt.randomInitialize();
@@ -31,7 +42,7 @@ int main()
 		NeuralNetwork nt(path.c_str());
 		cout << nt.judge(input);
 	}
-
+	*/
 
 	/*
 	try
@@ -46,7 +57,6 @@ int main()
 			Visualize::show(test[index].first, 28, 28);
 		}
 	}
-	*/
 
 	catch (const std::exception& e)
 	{
@@ -55,3 +65,4 @@ int main()
 	}
 	return 0;
 }
+*/

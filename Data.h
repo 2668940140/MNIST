@@ -19,7 +19,7 @@ public:
 	Data(const string& imf, const string& lbf);
 	inline bool open(const string& imf, const string& lbf);
 	bool good() const;
-	inline int size() const;
+	int size() const { return m_size; }
 	std::pair <Linear::RowVector, Linear::RowVector> operator[](int index);
 	int row_n() const { return numOfRow; }
 	int column_n() const { return numOfColumn; }
