@@ -10,7 +10,7 @@ const int depth;
 int* extents; //lenth equals to depth
 Linear::Matrix* connections; //lenth equals to depth-1,specifications accord with extents
 Linear::RowVector* biases; //lenth equals to depth - 1, specifications accord with extents
-Linear::RowVector* layers; //lenth equals to depth,specifications accord with extents	
+Linear::RowVector* layers; //lenth equals to depth,specifications accord with extents
 ActFunc actFunc = Sigmoid;
 LossFunc lossFunc = MSE;
 double optAlpha = 0.01;
@@ -21,7 +21,7 @@ inline void NeuralNetwork::deleteData()
 	delete[] extents, connections, biases, layers, errDeviation;
 }
 
-NeuralNetwork::NeuralNetwork(std::initializer_list<int> m) : NeuralNetwork(m.begin(),m.end())
+NeuralNetwork::NeuralNetwork(std::initializer_list<int> m) : NeuralNetwork(m.begin(), m.end())
 {
 }
 
@@ -52,13 +52,13 @@ NeuralNetwork::NeuralNetwork(int inputLayerExtent, int hideLayerNum, int hideLay
 	connections = new Linear::Matrix[depth - 1];
 	for (int i = 0; i < depth - 1; ++i)
 	{
-		connections[i].assign(extents[i], extents[i + 1], 1.0);
+		connections[i].assign(extents[i], extents[i + 1], 0.0);
 	}
 }
 
 NeuralNetwork::NeuralNetwork(const char* m_name)
 {
-	std::ifstream is(m_name);
+	std::ifstream is(m_name, std::ios_base::in | std::ios_base::binary);
 	is.read((char*)&depth, 4);
 	is.read((char*)&actFunc, 4);
 	is.read((char*)&lossFunc, 4);
@@ -72,7 +72,7 @@ NeuralNetwork::NeuralNetwork(const char* m_name)
 	biases = new Linear::RowVector[depth - 1];
 	for (int i = 0; i < depth - 1; ++i)
 	{
-		biases[i].assign(extents[i+1]);
+		biases[i].assign(extents[i + 1]);
 		connections[i].assign(extents[i], extents[i + 1]);
 		for (int j = 0; j < extents[i]; ++j)
 			for (int k = 0; k < extents[i + 1]; ++k)
@@ -80,18 +80,21 @@ NeuralNetwork::NeuralNetwork(const char* m_name)
 				is.read((char*)&connections[i][j][k], 8);
 			}
 	}
-
 	layers = new Linear::RowVector[depth];
 	errDeviation = new Linear::RowVector[depth];
+
 	for (int i = 0; i < depth; ++i)
 	{
 		layers[i].assign(extents[i]);
 		errDeviation[i].assign(extents[i]);
-		for (int j = 0; j < extents[i]; ++j)
-		{
-			is.read((char*)&biases[i][j], 8);
-		}
+		if (i != depth - 1)
+			for (int j = 0; j < extents[i + 1]; ++j)
+			{
+				is.read((char*)&biases[i][j], 8);
+				std::cout << biases[i][j] << std::endl;
+			}
 	}
+	return;
 }
 
 
@@ -130,13 +133,14 @@ void NeuralNetwork::reset(int inputLayerExtent, int hideLayerNum, int hideLayerE
 	connections = new Linear::Matrix[depth - 1];
 	for (int i = 0; i < depth - 1; ++i)
 	{
-		connections[i].assign(extents[i], extents[i + 1], 1.0);
+		connections[i].assign(extents[i], extents[i + 1], 0.0);
 	}
 }
 
 void NeuralNetwork::reset(const char* m_name)
 {
-	std::ifstream is(m_name);
+	deleteData();
+	std::ifstream is(m_name, std::ios_base::in | std::ios_base::binary);
 	is.read((char*)&depth, 4);
 	is.read((char*)&actFunc, 4);
 	is.read((char*)&lossFunc, 4);
@@ -158,26 +162,29 @@ void NeuralNetwork::reset(const char* m_name)
 				is.read((char*)&connections[i][j][k], 8);
 			}
 	}
-
 	layers = new Linear::RowVector[depth];
 	errDeviation = new Linear::RowVector[depth];
+
 	for (int i = 0; i < depth; ++i)
 	{
 		layers[i].assign(extents[i]);
 		errDeviation[i].assign(extents[i]);
-		for (int j = 0; j < extents[i]; ++j)
-		{
-			is.read((char*)&biases[i][j], 8);
-		}
+		if (i != depth - 1)
+			for (int j = 0; j < extents[i + 1]; ++j)
+			{
+				is.read((char*)&biases[i][j], 8);
+				//std::cout << biases[i][j] << std::endl;
+			}
 	}
+	return;
 }
 
-void NeuralNetwork::randomInitialize()
+void NeuralNetwork::randomInitialize() // paramters set to [-1.0,1.0]
 {
-	for (int i = 0; i < depth-1; ++i)
+	for (int i = 0; i < depth - 1; ++i)
 	{
-		connections[i].random();
-		biases[i].random();
+		connections[i].random(-1.0, 1.0);
+		biases[i].random(-1.0, 1.0);
 	}
 	return;
 }
@@ -195,16 +202,20 @@ bool NeuralNetwork::save(const char* m_path) const
 	}
 	for (int i = 0; i < depth - 1; ++i)
 		for (int j = 0; j < extents[i]; ++j)
-			for (int k = 0; k < extents[i+1]; ++k)
+			for (int k = 0; k < extents[i + 1]; ++k)
 			{
 				os.write((char*)&connections[i][j][k], 8);
+				//std::cout << connections[i][j][k] << std::endl;
 			}
-	for (int i = 0; i < depth; ++i)
-		for (int j = 0; j < extents[i]; ++j)
+
+	for (int i = 0; i < depth - 1; ++i)
+		for (int j = 0; j < extents[i + 1]; ++j)
 		{
 			os.write((char*)&biases[i][j], 8);
+			//std::cout << biases[i][j] << std::endl;
 		}
 	os.flush();
+	os.close();
 	return os.good();
 }
 
@@ -254,15 +265,15 @@ double NeuralNetwork::judge(const Linear::RowVector& input, const Linear::RowVec
 double NeuralNetwork::train(const Linear::RowVector& input, const Linear::RowVector& expectedOutput)
 {
 	judge(input);
-	
+
 	switch (actFunc)
 	{
 	case NeuralNetwork::Sigmoid:
 		switch (lossFunc)
 		{
 		case NeuralNetwork::MSE:
-			errDeviation[depth - 1] = dot(layers[depth - 1] - expectedOutput , layers[depth - 1] , 
-			Linear::RowVector(extents[depth-1],1.0) - layers[depth - 1]);
+			errDeviation[depth - 1] = dot(layers[depth - 1] - expectedOutput, layers[depth - 1],
+				Linear::RowVector(extents[depth - 1], 1.0) - layers[depth - 1]);
 			for (int i = depth - 2; i >= 0; --i)
 			{
 				errDeviation[i] = dot(errDeviation[i + 1] * connections[i].transpose(), layers[i],
@@ -283,7 +294,7 @@ double NeuralNetwork::train(const Linear::RowVector& input, const Linear::RowVec
 		throw std::exception("Unexcepted actFunc");
 		break;
 	}
-	
+
 	switch (lossFunc)
 	{
 	case NeuralNetwork::MSE:
@@ -312,6 +323,6 @@ double AuxFuncs::mse(const Linear::RowVector& m1, const Linear::RowVector& m2)
 	{
 		out += pow(m1[i] - m2[i], 2);
 	}
-	out /= m1.column_n() * 2; //for a better-looking derivative
+	out /= m1.column_n() * 2; //for a better-looking derivative, more strict
 	return out;
 }

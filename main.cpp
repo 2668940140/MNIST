@@ -19,7 +19,7 @@ int main()
 		if (inputOption == 1)
 		{
 			std::vector<int> extents;
-			std::wcout << "输入各个层的长度  用空格分割\n";
+			std::wcout << "输入各个层的长度  用空格分割(结束:enter+crtl+z+enter)\n";
 			int inputNum = -1;
 			while (std::cin>>inputNum && std::cin.good())
 			{
@@ -31,7 +31,7 @@ int main()
 				throw std::exception("Invalid Input");
 			nt.reset(extents.begin(), extents.end());
 		}
-		else if (inputOption == 0)
+		else if (inputOption == 2)
 		{
 			std::wcout << "输入文件路径(不含中文)\n";
 			std::string path;
@@ -77,7 +77,7 @@ int main()
 			int beginTime = int(time(nullptr));
 			nt.optAlpha = optA;
 			std::list<double> deviaList(stabFactor, 1.0);
-			while (cnt < maxIter || (time(nullptr)-beginTime)<=timeBound)
+			while (cnt < maxIter && (time(nullptr)-beginTime)<=timeBound)
 			{
 				double thisDevia = nt.train(dataSet[cnt % dataSetSize].first, dataSet[cnt % dataSetSize].second);
 				if (stabFactor)
@@ -101,7 +101,7 @@ int main()
 				throw std::exception("Save Failed");
 
 		}
-		else if (inputOption == 0) //手工单个测试
+		else if (inputOption == 2) //手工单个测试
 		{
 			std::wcout << "数据集共" << dataSetSize << "组数据" << '\n'
 				<< "输入序号获取结果(1-" << dataSetSize << ")" << std::endl
@@ -112,12 +112,14 @@ int main()
 				std::wcout << "图片:\n";
 				Visualize::show(dataSet[index - 1].first, 28, 28);
 				std::wcout << "目标:\n";
+				std::cout << dataSet[index-1].second<< std::endl;
+				std::wcout << "结果:\n";
 				std::cout << nt.judge(dataSet[index - 1].first) << std::endl;
 				std::wcout << "MSE偏差:\n";
 				std::cout << nt.judge(dataSet[index - 1].first, dataSet[index - 1].second) << std::endl;
 			}
 		}
-		else if (inputOption == 2) //全部测试
+		else if (inputOption == 3) //全部测试
 		{
 			double sumDeiva = 0;
 			int rightCnt = 0;

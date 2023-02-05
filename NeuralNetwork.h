@@ -99,7 +99,7 @@ NeuralNetwork::NeuralNetwork(Iter begin, Iter end) : depth(int(std::distance(beg
 	connections = new Linear::Matrix[depth - 1];
 	for (int i = 0; i < depth - 1; ++i)
 	{
-		connections[i].assign(extents[i], extents[i + 1], 1.0);
+		connections[i].assign(extents[i], extents[i + 1], 0.0);
 	}
 }
 
@@ -137,6 +137,6 @@ void NeuralNetwork::reset(Iter begin, Iter end)
 	connections = new Linear::Matrix[depth - 1];
 	for (int i = 0; i < depth - 1; ++i)
 	{
-		connections[i].assign(extents[i], extents[i + 1], 1.0);
+		connections[i].assign(extents[i], extents[i + 1], 0.0);
 	}
 }
