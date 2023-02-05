@@ -161,9 +161,9 @@ int main()
 	catch (const std::exception& e)
 	{
 		std::cout << e.what();
-		system("pause");
+		std::cin.get(); std::cin.get();
 		return 1;
 	}
-
+	std::cin.get(); std::cin.get();
 	return 0;
 }
